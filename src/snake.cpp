@@ -18,7 +18,7 @@ Snake::Snake() {
   setlocale(LC_ALL, "");
   initscr();
   resize_term(30, 80);
-  nodelay(stdscr, true);
+  // nodelay(stdscr, true);
   keypad(stdscr, true);
   noecho();
   curs_set(0);
@@ -32,12 +32,20 @@ Snake::Snake() {
   border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
   refresh();
 
+  InitScreen();
+  getch();
+  MainScreen();
+  nodelay(stdscr, true);
+
   getmaxyx(stdscr, maxheight, maxwidth);
+  maxheight = 21;
+  maxwidth = 42;
   //int maxheight = 30;
   //int maxwidth = 80;
   //init a few variables
   partchar = 'O';
-  oldalchar = (char)219;
+  // oldalchar = (char)219;
+  oldalchar = '@';
   angel.x = 0;
   angel.y = 0;
   devil.x = 0;
@@ -45,49 +53,142 @@ Snake::Snake() {
   for (int i=0; i<3; i++)
     snake.push_back(SnakePos(10+i,10));
   points = 0;
-  del = 110000;
+  del = 150000;
   get = false;
   direction = 'l';
+  over = false;
   srand(time(0));
   putangel();
   putdevil();
   //put the edges
   for (int i=0; i<maxwidth-1; i++) {
-    move(0,i);
-    addch(oldalchar);
+    wmove(gameWin,0,i);
+    waddch(gameWin,oldalchar);
   }
   for (int i=0; i<maxwidth-1; i++) {
-    move(maxheight-2, i);
-    addch(oldalchar);
+    wmove(gameWin,maxheight-2, i);
+    waddch(gameWin,oldalchar);
   }
   for (int i=0; i<maxheight-1; i++) {
-    move(i,0);
-    addch(oldalchar);
+    wmove(gameWin,i,0);
+    waddch(gameWin,oldalchar);
   }
   for (int i=0; i<maxheight-1; i++) {
-    move(i, maxwidth-2);
-    addch(oldalchar);
+    wmove(gameWin, i, maxwidth-2);
+    waddch(gameWin, oldalchar);
   }
   //draw the snake
   for (int i=0; i<snake.size(); i++) {
-    move(snake[i].y, snake[i].x);
-    addch(partchar);
+    wmove(gameWin, snake[i].y, snake[i].x);
+    waddch(gameWin, partchar);
   }
   //write the points(angel)
-  move(maxheight-1, 0);
-  printw("%d", points);
+  wmove(scoreWin,maxheight-1, 0);
+  mvwprintw(scoreWin, 3, 5, "%d", points);
   //draw the points(angel)
-  move(angel.y, angel.x);
-  addch('#');
-  refresh();
+  wattron(gameWin,COLOR_PAIR(3));
+  wmove(gameWin, angel.y, angel.x);
+  waddch(gameWin,'A');
+  wattroff(gameWin,COLOR_PAIR(3));
+  wrefresh(gameWin);
+  wrefresh(scoreWin);
 }
 
 Snake::~Snake() {
   nodelay(stdscr, false);
   getch();
+  delwin(gameWin);
+  delwin(scoreWin);
+  delwin(missionWin);
   endwin();
 }
 
+void Snake::InitScreen() {
+  attron(COLOR_PAIR(1));
+  mvprintw(13, 33, "SNAKE GAME");
+  mvprintw(15, 31, "Press Any Key..");
+  border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  //getch();
+  curs_set(0);
+  keypad(stdscr, TRUE);
+  noecho();
+  refresh();
+}
+
+void Snake::MainScreen() {
+  attron(COLOR_PAIR(1));
+  mvprintw(2, 33, "--Snake Game--");
+
+  GameWindow();
+  ScoreWindow();
+  MissionWindow();
+}
+
+void Snake::GameWindow() {
+  gameWin = newwin(21, 42, 5, 4);
+  wbkgd(gameWin, COLOR_PAIR(1));
+  wattron(gameWin, COLOR_PAIR(1));
+  keypad(stdscr,true);
+  wrefresh(gameWin);
+}
+
+void Snake::ScoreWindow() {
+  scoreWin = newwin(10, 28, 5, 48);
+  wbkgd(scoreWin, COLOR_PAIR(1));
+  wattron(scoreWin, COLOR_PAIR(1));
+  wborder(scoreWin, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  mvwprintw(scoreWin, 1, 1, "- - - -Score Board- - - -");
+  mvwprintw(scoreWin, 3, 2, "A : ");
+  mvwprintw(scoreWin, 5, 2, "D : ");
+  mvwprintw(scoreWin, 7, 2, "T : ");
+  wrefresh(scoreWin);
+}
+
+void Snake::MissionWindow() {
+  missionWin = newwin(10, 28, 16, 48);
+  wbkgd(missionWin, COLOR_PAIR(1));
+  wattron(missionWin, COLOR_PAIR(1));
+  wborder(missionWin, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  mvwprintw(missionWin, 1, 1, "- - - Mission Board - - -");
+  mvwprintw(missionWin, 3, 2, "A : ");
+  mvwprintw(missionWin, 5, 2, "D : ");
+  mvwprintw(missionWin, 7, 2, "T : ");
+  wrefresh(missionWin);
+  //추가
+}
+void Snake::NextStageScreen() {
+  clear();
+  nodelay(stdscr, FALSE); // ?
+  attron(COLOR_PAIR(1));
+  mvprintw(12, 31, "Stage Clear!");
+  mvprintw(17, 26, "Press Any Key...");
+  border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  getch();
+  refresh();
+}
+
+void Snake::GameOverScreen() {
+  clear();
+  //system("cls");
+  nodelay(stdscr, FALSE);
+  attron(COLOR_PAIR(1));
+  mvprintw(12, 33, "Game Over!");
+  mvprintw(17, 33, "Try agian!");
+  border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+  getch();
+  clear();
+}
+
+void Snake::GameClearScreen() {
+    clear();
+    //system("cls");
+    nodelay(stdscr, FALSE);
+    attron(COLOR_PAIR(1));
+    mvprintw(12, 35, "Game Clear!!!");
+    border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+    getch();
+    refresh();
+}
 
 void Snake::putangel() {
   while(1) {
@@ -100,15 +201,16 @@ void Snake::putangel() {
         continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
+    // add wall part
     angel.x = tmpx;
     angel.y = tmpy;
     break;
   }
-  attron(COLOR_PAIR(3)); //angel 3번 색깔로
-  move(angel.y, angel.x);
-  addch('#');
-  attroff(COLOR_PAIR(3));
-  refresh();
+  wattron(gameWin,COLOR_PAIR(3)); //angel 3번 색깔로
+  wmove(gameWin,angel.y, angel.x);
+  waddch(gameWin,'A');
+  wattroff(gameWin,COLOR_PAIR(3));
+  wrefresh(gameWin);
 }
 
 void Snake::putdevil() {
@@ -122,15 +224,16 @@ void Snake::putdevil() {
       continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
+    //add wall part
     devil.x = tmpx;
     devil.y = tmpy;
     break;
   }
-  attron(COLOR_PAIR(4)); //devil 4번 색깔로
-  move(devil.y, devil.x);
-  addch('#');
-  attroff(COLOR_PAIR(4));
-  refresh();
+  wattron(gameWin,COLOR_PAIR(4)); //devil 4번 색깔로
+  wmove(gameWin, devil.y, devil.x);
+  waddch(gameWin, 'D');
+  wattroff(gameWin,COLOR_PAIR(4));
+  wrefresh(gameWin);
 }
 
 bool Snake::collision() {
@@ -145,8 +248,9 @@ bool Snake::collision() {
     get = true;
     putangel();
     points += 10;
-    move(maxheight-1,0);
-    printw("%d", points);
+    wmove(gameWin, maxheight-1,0);
+    mvwprintw(scoreWin, 3 , 5,"%d", points);
+    wrefresh(scoreWin);
     if ((points%100)==0)
       del -= 10000;
   } else
@@ -157,8 +261,9 @@ bool Snake::collision() {
     putdevil();
     // 줄어드는거 어떻게?
     points -= 10;
-    move(maxheight-1,0);
-    printw("%d", points);
+    wmove(gameWin, maxheight-1,0);
+    mvwprintw(scoreWin, 3, 5,"%d", points);
+    wrefresh(scoreWin);
   }
   return false;
 }
@@ -169,27 +274,35 @@ void Snake::movesnake() {
     case KEY_RIGHT:
       if(direction != 'l')
         direction = 'r';
+      else
+        over = true;
       break;
     case KEY_LEFT:
       if(direction != 'r')
         direction = 'l';
+      else
+        over = true;
       break;
     case KEY_UP:
       if(direction != 'd')
         direction = 'u';
+      else
+        over = true;
       break;
     case KEY_DOWN:
       if(direction != 'u')
         direction = 'd';
+      else
+        over = true;
       break;
     case KEY_BACKSPACE:
       direction = 'q';
       break;
   }
   if(!get) {
-    move(snake[snake.size()-1].y, snake[snake.size()-1].x);
-    addch(' ');
-    refresh();
+    wmove(gameWin, snake[snake.size()-1].y, snake[snake.size()-1].x);
+    waddch(gameWin, ' ');
+    wrefresh(gameWin);
     snake.pop_back();
   }
   if(direction == 'l')
@@ -200,21 +313,22 @@ void Snake::movesnake() {
     snake.insert(snake.begin(), SnakePos(snake[0].x, snake[0].y-1));
   else if(direction == 'd')
     snake.insert(snake.begin(), SnakePos(snake[0].x, snake[0].y+1));
-  move(snake[0].y, snake[0].x);
-  addch(partchar);
-  refresh();
+  wmove(gameWin, snake[0].y, snake[0].x);
+  waddch(gameWin, partchar);
+  wrefresh(gameWin);
 }
 
 void Snake::start() {
   while(1) {
-    if(collision()) {
-      move(12, 36);
-      printw("game over");
+    if(collision()|| snake.size() < 3 || over) {
+      GameOverScreen();
       break;
     }
     movesnake();
-    if(direction=='q')
+    if(direction=='q'){
+      GameOverScreen();
       break;
+    }
     usleep(del);
   }
 }
