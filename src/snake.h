@@ -13,13 +13,16 @@ struct SnakePos{ // position
 };
 
 class Snake{
-  int points, del, maxwidth, maxheight;
+  int del, maxwidth, maxheight;
   char direction, partchar;
+  int angel_points, devil_points, total_points;
+  int angel_timer, devil_timer, gate_timer, total_timer;
   bool get;
   SnakePos angel;
   SnakePos devil;
   std::vector<SnakePos> snake;
   bool over;
+  int nowlength;
 
   //screen
   WINDOW *gameWin;
@@ -28,6 +31,9 @@ class Snake{
 
   void putangel();
   void putdevil();
+  void angeltime();
+  void deviltime();
+  int getlength();
   bool collision();
   void movesnake();
 

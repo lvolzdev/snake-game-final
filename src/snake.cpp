@@ -53,11 +53,19 @@ Snake::Snake() {
   devil.y = 0;
   for (int i=0; i<3; i++)
     snake.push_back(SnakePos(10+i, 5));
-  points = 0;
-  del = 150000;
+  angel_points = 0;
+  devil_points = 0;
+  total_points = 0;
+  angel_timer = 0;
+  devil_timer = 0;
+  gate_timer = 0;
+  total_timer = 0;
+  del = 130000;
   get = false;
   direction = 'l';
   over = false;
+  // nowlength = 3;
+
   srand(time(0));
   putangel();
   putdevil();
@@ -68,8 +76,13 @@ Snake::Snake() {
     waddch(gameWin, partchar);
   }
   //write the points(angel)
+  getlength();
   wmove(scoreWin,maxheight-1, 0);
-  mvwprintw(scoreWin, 3, 5, "%d", points);
+  mvwprintw(scoreWin, 2, 8, "%d", nowlength);
+  mvwprintw(scoreWin, 4, 8, "%d", angel_points);
+  mvwprintw(scoreWin, 6, 8, "%d", devil_points);
+  mvwprintw(scoreWin, 8, 21, "%d", total_points);
+
   //draw the points(angel)
   wattron(gameWin,COLOR_PAIR(3));
   wmove(gameWin, angel.y, angel.x);
@@ -123,7 +136,7 @@ void Snake::getMapOnGameWindow() {
     for (int j=0; j<MAP_WIDTH; j++) {
       char c = m.mapArr[i][j];
       if (c == '1' || c == '2')
-        mvwprintw(gameWin, i, j*2, "\u25A0");
+        mvwprintw(gameWin, i, j*2, "ㅁ"); //"\u25A0"
       else if (c == '0')
         mvwprintw(gameWin, i, j*2, "\u0020");
     }
@@ -137,9 +150,12 @@ void Snake::ScoreWindow() {
   wattron(scoreWin, COLOR_PAIR(1));
   wborder(scoreWin, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
   mvwprintw(scoreWin, 1, 1, "- - - -Score Board- - - -");
-  mvwprintw(scoreWin, 3, 2, "A : ");
-  mvwprintw(scoreWin, 5, 2, "D : ");
-  mvwprintw(scoreWin, 7, 2, "T : ");
+  mvwprintw(scoreWin, 2, 2, "B : "); // snake size
+  mvwprintw(scoreWin, 2, 15, "MAX : 9"); // maxlength
+  mvwprintw(scoreWin, 4, 2, "+ : "); // angel
+  mvwprintw(scoreWin, 6, 2, "- : "); // devil
+  mvwprintw(scoreWin, 8, 2, "G : "); //gate
+  mvwprintw(scoreWin, 8, 17, "T : "); //totalscore
   wrefresh(scoreWin);
 }
 
@@ -149,9 +165,10 @@ void Snake::MissionWindow() {
   wattron(missionWin, COLOR_PAIR(1));
   wborder(missionWin, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
   mvwprintw(missionWin, 1, 1, "- - - Mission Board - - -");
-  mvwprintw(missionWin, 3, 2, "A : ");
-  mvwprintw(missionWin, 5, 2, "D : ");
-  mvwprintw(missionWin, 7, 2, "T : ");
+  mvwprintw(missionWin, 2, 2, "B : ");
+  mvwprintw(missionWin, 4, 2, "+ : ");
+  mvwprintw(missionWin, 6, 2, "- : ");
+  mvwprintw(missionWin, 8, 2, "G : ");
   wrefresh(missionWin);
   //추가
 }
@@ -188,7 +205,10 @@ void Snake::GameClearScreen() {
     getch();
     endwin();
 }
-
+int Snake::getlength(){
+  nowlength = snake.size();
+  return nowlength;
+}
 void Snake::putangel() {
   while(1) {
     int tmpx = rand()%maxwidth+1;
@@ -202,7 +222,7 @@ void Snake::putangel() {
         continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
-    // add wall part
+    // add wall, gate part
     angel.x = tmpx;
     angel.y = tmpy;
     //map[tmpy][tmpx] = 5; //angel item data value
@@ -228,7 +248,7 @@ void Snake::putdevil() {
       continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
-    //add wall part
+    //add wall , gate part
     devil.x = tmpx;
     devil.y = tmpy;
     //map[tmpy][tmpx] = 6; //devil item data value
@@ -241,41 +261,76 @@ void Snake::putdevil() {
   wrefresh(gameWin);
 }
 
+void Snake::angeltime(){
+  angel_timer++;
+  if(angel_timer % 60 == 0 ){
+    wmove(gameWin, angel.y, angel.x);
+    wprintw(gameWin, " ");
+    //add map change 0
+    putangel();
+    angel_timer = 0;
+  }
+}
+
+void Snake::deviltime(){
+  devil_timer++;
+  if(devil_timer % 60 == 0){
+    wmove(gameWin, devil.y, devil.x);
+    wprintw(gameWin, " ");
+    //add map change 0
+    putdevil();
+    devil_timer = 0;
+  }
+}
+
 bool Snake::collision() {
   //벽에 닿을 때
   if(snake[0].x==0 || snake[0].x == maxwidth || snake[0].y==0 || snake[0].y==maxheight) //벽
     return true;
-  /*
-  for(int i=0; i<snake.size()-1; i++) {
-    if(m.mapArr[snake[i].y][snake[i].x] == '1') {
-      return true;
-    }
-  }
-  */
+
+  // for(int i=0; i<snake.size()-1; i++) {
+  //   if(m.mapArr[snake[i].y][snake[i].x] == '1') {
+  //     return true;
+  //   }
+  // }
+
   //자기 몸에 닿을 때
   for (int i=2; i<snake.size(); i++)
     if(snake[0].x == snake[i].x && snake[i].y == snake[0].y)
       return true;
+
   //angel과 닿을 때
   if(snake[0].x==angel.x && snake[0].y==angel.y) {
     get = true;
     putangel();
-    points += 10;
+    angel_points += 10;
+    total_points += 10;
+    getlength();
     wmove(gameWin, maxheight-1,0);
-    mvwprintw(scoreWin, 3 , 5,"%d", points);
+    mvwprintw(scoreWin, 4 , 8,"%d", angel_points);
+    mvwprintw(scoreWin, 2, 8, "%d", nowlength);
+    mvwprintw(scoreWin, 8, 21, "%d", total_points);
     wrefresh(scoreWin);
-    if ((points%100)==0)
+    if ((angel_points%100)==0)
       del -= 10000;
   } else
     get = false;
   //devil과 닿을 때
   if(snake[0].x==devil.x && snake[0].y==devil.y) {
-    get = true;
     putdevil();
     // 줄어드는거 어떻게?
-    points -= 10;
+    wmove(gameWin, snake[snake.size()-1].y, snake[snake.size()-1].x);
+    snake.pop_back();
+    wprintw(gameWin, " ");
+    wrefresh(gameWin);
+
+    getlength();
+    devil_points += 10;
+    total_points -= 10;
     wmove(gameWin, maxheight-1,0);
-    mvwprintw(scoreWin, 3, 5,"%d", points);
+    mvwprintw(scoreWin, 6, 8,"%d", devil_points);
+    mvwprintw(scoreWin, 2, 8,"%d", nowlength);
+    mvwprintw(scoreWin, 8, 21, "%d", total_points);
     wrefresh(scoreWin);
   }
   return false;
@@ -329,6 +384,10 @@ void Snake::movesnake() {
   wmove(gameWin, snake[0].y, snake[0].x);
   waddch(gameWin, partchar);
   wrefresh(gameWin);
+  getlength();
+  mvwprintw(scoreWin, 2, 8, "%d", nowlength);
+  wrefresh(scoreWin);
+
 }
 
 void Snake::start() {
@@ -343,5 +402,7 @@ void Snake::start() {
       break;
     }
     usleep(del);
+    angeltime();
+    deviltime();
   }
 }
