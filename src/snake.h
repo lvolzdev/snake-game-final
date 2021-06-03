@@ -14,7 +14,7 @@ struct SnakePos{ // position
 
 class Snake{
   int points, del, maxwidth, maxheight;
-  char direction, partchar, oldalchar, foo;
+  char direction, partchar;
   bool get;
   SnakePos angel;
   SnakePos devil;
