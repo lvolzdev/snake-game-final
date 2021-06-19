@@ -197,11 +197,10 @@ void Snake::MissionWindow() {
   mvwprintw(missionWin, 6, 2, "- : ");
   mvwprintw(missionWin, 8, 2, "G : ");
   wrefresh(missionWin);
-  //추가
 }
 void Snake::NextStageScreen() {
   clear();
-  nodelay(stdscr, FALSE); // ?
+  nodelay(stdscr, FALSE);
   attron(COLOR_PAIR(1));
   attrset(A_BOLD);
   mvprintw(12, 31, "Stage Clear!");
@@ -239,60 +238,51 @@ void Snake::setMission(){
   switch (stage) {
 
     case 1:
-
       mvwprintw(missionWin, 2, 8, "4");
-      mvwprintw(missionWin, 4, 8, "30");
-      mvwprintw(missionWin, 6, 8, "20");
-      mvwprintw(missionWin, 8, 8, "2");
+      mvwprintw(missionWin, 4, 8, "10");
+      mvwprintw(missionWin, 6, 8, "10");
+      mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-
       goal_size = 4;
-      goal_angel = 30;
-      goal_devil = 20;
-      goal_gate = 2;
-
+      goal_angel = 10;
+      goal_devil = 10;
+      goal_gate = 0;
       break;
 
     case 2:
-      mvwprintw(missionWin, 2, 8, "6");
-      mvwprintw(missionWin, 4, 8, "50");
-      mvwprintw(missionWin, 6, 8, "40");
-      mvwprintw(missionWin, 8, 8, "4");
+      mvwprintw(missionWin, 2, 8, "5");
+      mvwprintw(missionWin, 4, 8, "30");
+      mvwprintw(missionWin, 6, 8, "20");
+      mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-
-      goal_size = 6;
-      goal_angel = 50;
-      goal_devil = 40;
-      goal_gate = 4;
-
+      goal_size = 5;
+      goal_angel = 30;
+      goal_devil = 20;
+      goal_gate = 0;
       break;
 
     case 3:
-      mvwprintw(missionWin, 2, 8, "8");
-      mvwprintw(missionWin, 4, 8, "70");
-      mvwprintw(missionWin, 6, 8, "60");
-      mvwprintw(missionWin, 8, 8, "6");
+      mvwprintw(missionWin, 2, 8, "6");
+      mvwprintw(missionWin, 4, 8, "40");
+      mvwprintw(missionWin, 6, 8, "20");
+      mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-
-      goal_size = 8;
-      goal_angel = 70;
-      goal_devil = 60;
-      goal_gate = 6;
-
+      goal_size = 6;
+      goal_angel = 40;
+      goal_devil = 20;
+      goal_gate = 0;
       break;
 
     case 4:
-      mvwprintw(missionWin, 2, 8, "10");
-      mvwprintw(missionWin, 4, 8, "80");
-      mvwprintw(missionWin, 6, 8, "70");
-      mvwprintw(missionWin, 8, 8, "7");
+      mvwprintw(missionWin, 2, 8, "7");
+      mvwprintw(missionWin, 4, 8, "50");
+      mvwprintw(missionWin, 6, 8, "30");
+      mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-
-      goal_size = 10;
-      goal_angel = 80;
-      goal_devil = 70;
-      goal_gate = 7;
-
+      goal_size = 7;
+      goal_angel = 50;
+      goal_devil = 30;
+      goal_gate = 0;
       break;
   }
 }
@@ -321,13 +311,13 @@ void Snake::changestage(){
       getmaxyx(stdscr, maxheight, maxwidth);
       maxheight = 21;
       maxwidth = 42;
+
       //init a few variables
       partchar = 'O';
       angel.x = 0;
       angel.y = 0;
       devil.x = 0;
       devil.y = 0;
-
 
       angel_points = 0;
       devil_points = 0;
@@ -386,10 +376,13 @@ void Snake::putangel() {
     for (int i=0; i<snake.size(); i++)
       if(snake[i].x == tmpx && snake[i].y == tmpy) //snake와 겹치지 않게
         continue;
+
     if(devil.x == tmpx && devil.y == tmpy) //devil item과 겹치기 않게
-        continue;
+      continue;
     if (m.mapArr[tmpy][tmpx] == WALL || m.mapArr[tmpy][tmpx] == IMMUNEWALL) //벽과 겹치지 않게
-        continue;
+      continue;
+    if(tmpx == 2 || tmpx == maxwidth-3 || tmpy == 1 || tmpy == maxheight-2) //벽
+      continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
     // add wall, gate part
@@ -413,9 +406,12 @@ void Snake::putdevil() {
     for (int i=0; i<snake.size(); i++)
       if(snake[i].x == tmpx && snake[i].y == tmpy) //snake와 겹치지 않게
         continue;
+
     if(angel.x == tmpx && angel.y == tmpy) //angel item과 겹치기 않게
       continue;
     if (m.mapArr[tmpy][tmpx] == WALL || m.mapArr[tmpy][tmpx] == IMMUNEWALL) //벽과 겹치지 않게
+      continue;
+    if(tmpx == 2 || tmpx == maxwidth-3 || tmpy == 1 || tmpy == maxheight-2) //벽
       continue;
     if (tmpx >= maxwidth-2 || tmpy >= maxheight-3)
       continue;
@@ -470,12 +466,10 @@ void Snake::deviltime(){
 //   }
 // }
 
-
 bool Snake::collision() {
   //벽에 닿을 때
-  if(snake[0].x==0 || snake[0].x == maxwidth || snake[0].y==0 || snake[0].y==maxheight) //벽
+  if(snake[0].x==2 || snake[0].x == maxwidth-3 || snake[0].y==1 || snake[0].y==maxheight-2) //벽
     return true;
-
 
   // for(int i=0; i<snake.size()-1; i++) {
   //   if(m.mapArr[snake[i].y][snake[i].x] == WALL || m.mapArr[snake[i].y][snake[i].x] == IMMUNEWALL) {
@@ -520,7 +514,6 @@ bool Snake::collision() {
     snake.pop_back();
     wprintw(gameWin, " ");
     wrefresh(gameWin);
-
     getlength();
     devil_points += 10;
     total_points -= 10;
@@ -538,7 +531,6 @@ bool Snake::collision() {
     }
     wrefresh(missionWin);
   }
-
   return false;
 }
 
@@ -600,7 +592,6 @@ void Snake::movesnake() {
     mvwprintw(missionWin, 8, 15, "v");
   }
   wrefresh(missionWin);
-
 }
 
 void Snake::start() {
