@@ -123,7 +123,7 @@ void Snake::InitScreen() {
   attron(COLOR_PAIR(1));
   attrset(A_BOLD);
   mvprintw(13, 33, "SNAKE GAME");
-  mvprintw(18, 22, "Press Any Key To Start!");
+  mvprintw(18, 26, "Press Any Key To Start!");
   border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
   //getch();
   curs_set(0);
@@ -250,38 +250,38 @@ void Snake::setMission(){
       break;
 
     case 2:
-      mvwprintw(missionWin, 2, 8, "5");
-      mvwprintw(missionWin, 4, 8, "30");
-      mvwprintw(missionWin, 6, 8, "20");
+      mvwprintw(missionWin, 2, 8, "4");
+      mvwprintw(missionWin, 4, 8, "20");
+      mvwprintw(missionWin, 6, 8, "10");
       mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-      goal_size = 5;
-      goal_angel = 30;
-      goal_devil = 20;
+      goal_size = 4;
+      goal_angel = 20;
+      goal_devil = 10;
       goal_gate = 0;
       break;
 
     case 3:
-      mvwprintw(missionWin, 2, 8, "6");
-      mvwprintw(missionWin, 4, 8, "40");
-      mvwprintw(missionWin, 6, 8, "20");
+      mvwprintw(missionWin, 2, 8, "5");
+      mvwprintw(missionWin, 4, 8, "20");
+      mvwprintw(missionWin, 6, 8, "10");
       mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-      goal_size = 6;
-      goal_angel = 40;
-      goal_devil = 20;
+      goal_size = 5;
+      goal_angel = 20;
+      goal_devil = 10;
       goal_gate = 0;
       break;
 
     case 4:
-      mvwprintw(missionWin, 2, 8, "7");
-      mvwprintw(missionWin, 4, 8, "50");
-      mvwprintw(missionWin, 6, 8, "30");
+      mvwprintw(missionWin, 2, 8, "5");
+      mvwprintw(missionWin, 4, 8, "30");
+      mvwprintw(missionWin, 6, 8, "10");
       mvwprintw(missionWin, 8, 8, "0");
       wrefresh(missionWin);
-      goal_size = 7;
-      goal_angel = 50;
-      goal_devil = 30;
+      goal_size = 5;
+      goal_angel = 30;
+      goal_devil = 10;
       goal_gate = 0;
       break;
   }
@@ -388,7 +388,7 @@ void Snake::putangel() {
     // add wall, gate part
     angel.x = tmpx;
     angel.y = tmpy;
-    m.mapArr[tmpy][tmpx] = '6'; //angel item data value
+    m.mapArr[tmpy][tmpx] = ANGEL; //angel item data value
     break;
   }
   wattroff(gameWin,A_BOLD);
@@ -418,7 +418,7 @@ void Snake::putdevil() {
     //add wall , gate part
     devil.x = tmpx;
     devil.y = tmpy;
-    m.mapArr[tmpy][tmpx] = '7'; //devil item data value
+    m.mapArr[tmpy][tmpx] = DEVIL; //devil item data value
     break;
   }
   wattroff(gameWin,A_BOLD);
