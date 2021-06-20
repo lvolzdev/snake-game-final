@@ -12,9 +12,9 @@
 #define IMMUNEWALL '2'
 #define HEAD '3'
 #define BODY '4'
-#define GATE '5'
-#define ANGEL '6'
-#define DEVIL '7'
+#define ANGEL '5'
+#define DEVIL '6'
+#define GATE '7'
 
 struct SnakePos{ // position
   int x, y;
