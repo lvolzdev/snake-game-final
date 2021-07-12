@@ -1,4 +1,4 @@
-# :snake:snake-game-2:snake:
+# :snake:snake-game:snake:
 
 
 
@@ -24,3 +24,11 @@ git push origin 브랜치명
 
 * pull 받기  
 git pull origin master
+
+
+## game screen
+![image](https://user-images.githubusercontent.com/63188042/125302410-dedb1080-e366-11eb-85bc-867bed4283bc.png)
+
+
+## youtube link
+https://www.youtube.com/watch?v=2hkaTNNXdNo&t=37s
